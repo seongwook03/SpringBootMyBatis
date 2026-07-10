@@ -44,4 +44,25 @@
                 NOW())
     </insert>
 
+    <select id="getLogin" parameterType="UserInfoDTO" resultType="UserInfoDTO">
+        SELECT USER_ID, USER_NAME, EMAIL
+        FROM USER_INFO
+        WHERE USER_ID = #{userId}
+          AND PASSWORD = #{password}
+    </select>
+
+    <select id="getUserId" parameterType="UserInfoDTO" resultType="UserInfoDTO">
+        SELECT
+        USER_ID,
+        USER_NAME,
+        EMAIL
+        FROM USER_INFO
+        WHERE 1=1
+        <if test="userId neq null and userId neq '' "> <!--비밀번호 찾기라면, user_id 조회 추가 -->
+            AND USER_ID = #{userId}
+        </if>
+        AND USER_NAME = #{userName}
+        AND EMAIL = #{email}
+    </select>
+
 </mapper>

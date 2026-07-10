@@ -18,8 +18,9 @@ import org.springframework.stereotype.Service;
 public class MailService implements IMailService {
 
     private final JavaMailSender mailSender;
+    //JavaMailSender -> 스프링 제공 (메일 발송 객체)
 
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.username}")// -> 저 이름의 설정값을 application에서 가지고 옴
     private String fromMail;
 
 
@@ -28,8 +29,12 @@ public class MailService implements IMailService {
 
         log.info("{}.doSendMail start!", this.getClass().getName());
 
-        int res = 1;
 
+        int res = 1;
+        //메일 발송 성공여부 확인용
+
+
+        //DTO 로부터 데이터 가져오기. null에 의한 에러방지를 위한 if문
         if (pDTO == null) {
             pDTO = new MailDTO();
         }
