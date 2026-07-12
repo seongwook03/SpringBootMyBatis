@@ -47,20 +47,22 @@ public class MailService implements IMailService {
 
 
         MimeMessage message = mailSender.createMimeMessage();
+        //메일 발송 메시지 구조(파일 첨부 가능)
 
 
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, "UTF-8");
+        // 메일 발송 메시지 구조 쉽게 생성 위한 객체
 
         try {
 
-            messageHelper.setTo(toMail);
-            messageHelper.setFrom(fromMail);
-            messageHelper.setSubject(title);
-            messageHelper.setText(contents);
+            messageHelper.setTo(toMail);//받는 사람
+            messageHelper.setFrom(fromMail);// 보내는 사람
+            messageHelper.setSubject(title);// 메일 제목
+            messageHelper.setText(contents);// 메일 내용
             mailSender.send(message);
 
-        } catch (Exception e) {
-            res = 0;
+        } catch (Exception e) { // 에러 잡기
+            res = 0; // 발송 실패 -> 0으로 변경
             log.info("[ERRER] doSendMail : {}", e);
         }
 

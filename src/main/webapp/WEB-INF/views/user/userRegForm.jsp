@@ -18,11 +18,13 @@
 
 
         let userIdCheck = "Y";
-
+        // 아이디 중복 체크 여부 (중복->Y, 아니면 -> N)
 
         let emailAuthNumber = "";
+        // 이메일 중복 체그 인증번호 발송 값
 
 
+        // html 로딩 완료 후 실행
         $(document).ready(function () {
 
             let f = document.getElementById("f");
@@ -39,7 +41,7 @@
 
             })
 
-
+            // 우편번호
             $("#btnAddr").on("click", function () {
                 kakaoPost(f);
             })
@@ -51,7 +53,7 @@
 
         })
 
-
+        // 아이디 중복 체크
         function userIdExists(f) {
 
             if (f.userId.value === "") {
@@ -60,7 +62,7 @@
                 return;
             }
 
-
+            // ajax 호출해서 회원가입
             $.ajax({
                     url: "/user/getUserIdExists",
                     type: "post",
@@ -82,7 +84,7 @@
             )
         }
 
-
+        // 이메일 중복 체크
         function emailExists(f) {
             if (f.email.value === "") {
                 alert("이메일을 입력하세요.");
@@ -93,8 +95,8 @@
 
             $.ajax({
                     url: "/user/getEmailExists",
-                    type: "post",
-                    dataType: "JSON",
+                    type: "post", // 전송은 post
+                    dataType: "JSON", // 결과는 json으로
                     data: $("#f").serialize(),
                     success: function (json) {
 
@@ -113,7 +115,7 @@
             )
         }
 
-
+        //카카오 우편번호 api 호출
         function kakaoPost(f) {
             new daum.Postcode({
                 oncomplete: function (data) {
@@ -126,7 +128,7 @@
             }).open();
         }
 
-
+        // 회원가입 정보의 유효성 체크
         function doSubmit(f) {
 
             if (f.userId.value === "") {

@@ -21,15 +21,16 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class UserInfoService implements IUserInfoService{
 
-    private final IUserInfoMapper userInfoMapper;
+    private final IUserInfoMapper userInfoMapper; // 회원관련 sql사용을 위한 Mapper 가져오기
 
-    private final IMailService mailService;
+    private final IMailService mailService; // 메일 발송을 위한 MailService 자바 객체 가져오기
 
 
     @Override
     public UserInfoDTO getUserIdExists(UserInfoDTO pDTO) throws Exception {
         log.info("{}.getUserIdExists Start!", this.getClass().getName());
 
+        //DB 이메일이 존재하는지 실행
         UserInfoDTO rDTO = userInfoMapper.getUserIdExists(pDTO);
 
         log.info("{}.getUserIdExists End!", this.getClass().getName());
@@ -41,11 +42,12 @@ public class UserInfoService implements IUserInfoService{
     public UserInfoDTO getEmailExists(UserInfoDTO pDTO) throws Exception {
 
         log.info("{}.emailAuth Start!", this.getClass().getName());
-
+        // 이메일 존재하는지 sql 실행
         UserInfoDTO rDTO = Optional.ofNullable(userInfoMapper.getEmailExists(pDTO)).orElseGet(UserInfoDTO::new);
 
         log.info("rDTO : {}", rDTO);
 
+        // 이메일 중복아니면 인증번호 발송
         if (CmmUtil.nvl(rDTO.getExistsYn()).equals("N")) {
             int authNumber = ThreadLocalRandom.current().nextInt(10000, 1000000);
 
@@ -57,11 +59,11 @@ public class UserInfoService implements IUserInfoService{
             dto.setContents("인증번호는 " + authNumber + " 입니다.");
             dto.setToMail(EncryptUtil.decAES128CBC(CmmUtil.nvl(pDTO.getEmail())));
 
-            mailService.doSendMail(dto);
+            mailService.doSendMail(dto); // 발송
 
             dto = null;
 
-            rDTO.setAuthNumber(authNumber);
+            rDTO.setAuthNumber(authNumber); // 인증번호를 결과값에 넣어주기
 
         }
 
@@ -75,7 +77,7 @@ public class UserInfoService implements IUserInfoService{
 
         log.info("{}.insertUserInfo Start!", this.getClass().getName());
 
-        int res;
+        int res; // 회원가입 성공 -> 1, 중복 인한 가입 취소 -> 2, 기타 에러 -> 0
 
         int success = userInfoMapper.insertUserInfo(pDTO);
 
@@ -84,6 +86,7 @@ public class UserInfoService implements IUserInfoService{
 
             MailDTO mDTO = new MailDTO();
 
+            // 입력받은 이메일을 변수로 암호와
             mDTO.setToMail(EncryptUtil.decAES128CBC(CmmUtil.nvl(pDTO.getEmail())));
 
             mDTO.setTitle("회원가입을 축하드립니다.");
@@ -92,7 +95,7 @@ public class UserInfoService implements IUserInfoService{
             mDTO.setContents(CmmUtil.nvl(pDTO.getUserName()) + "님의 회원가입을 진심으로 축하드립니다.");
 
 
-            mailService.doSendMail(mDTO);
+            mailService.doSendMail(mDTO);// 회원가입 성공했기 때문에 메일 발송
         } else {
         res = 0;
 
@@ -112,13 +115,7 @@ public class UserInfoService implements IUserInfoService{
         // userInfoMapper.getUserLoginCheck(pDTO) 함수 실행 결과가 NUll 발생하면, UserInfoDTO 메모리에 올리기
         UserInfoDTO rDTO = Optional.ofNullable(userInfoMapper.getLogin(pDTO)).orElseGet(UserInfoDTO::new);
 
-        /*
-         * userInfoMapper로 부터 SELECT 쿼리의 결과로 회원아이디를 받아왔다면, 로그인 성공!!
-         *
-         * DTO의 변수에 값이 있는지 확인하기 처리속도 측면에서 가장 좋은 방법은 변수의 길이를 가져오는 것이다.
-         * 따라서  .length() 함수를 통해 회원아이디의 글자수를 가져와 0보다 큰지 비교한다.
-         * 0보다 크다면, 글자가 존재하는 것이기 때문에 값이 존재한다.
-         */
+
         if (!CmmUtil.nvl(rDTO.getUserId()).isEmpty()) {
 
             MailDTO mDTO = new MailDTO();
@@ -143,11 +140,6 @@ public class UserInfoService implements IUserInfoService{
     }
 
     @Override
-    public UserInfoDTO getUserId(UserInfoDTO pDTO) throws Exception {
-        return null;
-    }
-
-    @Override
     public UserInfoDTO searchUserIdOrPasswordProc(UserInfoDTO pDTO) throws Exception {
 
         log.info("{}.searchUserIdOrPasswordProc Start!", this.getClass().getName());
@@ -159,7 +151,17 @@ public class UserInfoService implements IUserInfoService{
         return rDTO;
     }
 
+    @Override
+    public int newPasswordProc(UserInfoDTO pDTO) throws Exception {
 
+        log.info("{}.newPasswordProc Start!", this.getClass().getName());
+
+        int success = userInfoMapper.updatePassword(pDTO);
+
+        log.info("{}.newPasswordProc End!", this.getClass().getName());
+
+        return success;
+    }
 
 
 }

@@ -24,6 +24,7 @@ public class EncryptUtil {
 
     public static String encHashSHA256(String str){
 
+        // 암호화 하는 Util 클래스 코드
         String result;
         String plainText = addMessage + str;
 
